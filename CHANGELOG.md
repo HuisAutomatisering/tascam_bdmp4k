@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.0
+
+- Renamed entities so that Home Assistant's alphabetical ordering groups
+  them logically: tray controls, menu controls, mute and the time
+  sensors now sit together
+- Added manual trigger (workflow_dispatch) to the CodeQL workflow
+
 ## 2.2.1
 
 - Reformatted the integration code so it passes `ruff format --check`

@@ -48,22 +48,22 @@
           "home_menu": "Home menu"
         }
       },
-      "elapsed_time": {"name": "Elapsed time"},
-      "remaining_time": {"name": "Remaining time"},
+      "elapsed_time": {"name": "Time elapsed"},
+      "remaining_time": {"name": "Time remaining"},
       "current_chapter": {"name": "Current chapter"},
       "current_title": {"name": "Current title"}
     },
     "button": {
-      "tray_open": {"name": "Open tray"},
-      "tray_close": {"name": "Close tray"},
-      "home": {"name": "Home"},
-      "enter": {"name": "Enter"},
-      "return": {"name": "Return"},
-      "top_menu": {"name": "Top menu"},
-      "popup_menu": {"name": "Popup menu"},
-      "setup_menu": {"name": "Setup menu"},
+      "tray_open": {"name": "Tray open"},
+      "tray_close": {"name": "Tray close"},
+      "home": {"name": "Menu home"},
+      "enter": {"name": "Menu enter"},
+      "return": {"name": "Menu return"},
+      "top_menu": {"name": "Menu top (disc)"},
+      "popup_menu": {"name": "Menu popup"},
+      "setup_menu": {"name": "Menu setup"},
       "display_info": {"name": "Display info"},
-      "subtitle_next": {"name": "Next subtitle"},
+      "subtitle_next": {"name": "Subtitle next"},
       "mute_on": {"name": "Mute on"},
       "mute_off": {"name": "Mute off"},
       "power_off": {"name": "Power off (standby)"}
