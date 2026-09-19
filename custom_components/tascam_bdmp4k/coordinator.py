@@ -47,12 +47,14 @@ def parse_hms(value: str) -> int | None:
     """Parse an hhhmmss time string into seconds."""
     if len(value) != 7 or not value.isdigit():
         return None
-    hours, minutes, seconds = int(value[:3]), int(value[3:5]), int(value[5:7])
+    hours = int(value[:3])
+    minutes = int(value[3:5])
+    seconds = int(value[5:7])
     return hours * 3600 + minutes * 60 + seconds
 
 
 def parse_number(value: str) -> int | None:
-    """Parse a 4-digit chapter/title number, handling UNKN."""
+    """Parse a 4-digit chapter or title number, handling UNKN."""
     if value.isdigit():
         return int(value)
     return None
@@ -159,19 +161,18 @@ class TascamCoordinator(DataUpdateCoordinator[TascamState]):
 
                 remaining = await self._query(REQ_REMAIN)
                 if remaining is not None and remaining.startswith("SRT"):
-                    state.remaining = parse_hms(remaining.removeprefix("SRT"))
+                    value = remaining.removeprefix("SRT")
+                    state.remaining = parse_hms(value)
 
                 chapter = await self._query(REQ_CURRENT_CHAPTER)
                 if chapter is not None and chapter.startswith("TNM"):
-                    state.current_chapter = parse_number(
-                        chapter.removeprefix("TNM")
-                    )
+                    value = chapter.removeprefix("TNM")
+                    state.current_chapter = parse_number(value)
 
                 title = await self._query(REQ_CURRENT_TITLE)
                 if title is not None and title.startswith("GNM"):
-                    state.current_title = parse_number(
-                        title.removeprefix("GNM")
-                    )
+                    value = title.removeprefix("GNM")
+                    state.current_title = parse_number(value)
         except TascamConnectionError as err:
             _LOGGER.debug("Lost connection during poll: %s", err)
 

@@ -17,7 +17,8 @@ PLATFORMS: list[Platform] = [
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: TascamConfigEntry
+    hass: HomeAssistant,
+    entry: TascamConfigEntry,
 ) -> bool:
     """Set up Tascam BD-MP4K from a config entry."""
     client = TascamClient(entry.data[CONF_HOST], entry.data[CONF_PORT])
@@ -30,11 +31,13 @@ async def async_setup_entry(
 
 
 async def async_unload_entry(
-    hass: HomeAssistant, entry: TascamConfigEntry
+    hass: HomeAssistant,
+    entry: TascamConfigEntry,
 ) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(
-        entry, PLATFORMS
+        entry,
+        PLATFORMS,
     )
     if unload_ok:
         await entry.runtime_data.client.async_disconnect()

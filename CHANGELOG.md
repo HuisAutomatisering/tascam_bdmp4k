@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.1
+
+- Reformatted the integration code so it passes `ruff format --check`
+- Pinned the Ruff version in CI and `pyproject.toml` so a future Ruff
+  release cannot break the check unexpectedly
+- Updated `actions/checkout` to v5
+
 ## 2.2.0
 
 - Added hassfest, HACS, CodeQL and Ruff validation workflows

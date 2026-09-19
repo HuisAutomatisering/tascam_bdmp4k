@@ -87,7 +87,8 @@ class TascamMediaPlayer(TascamEntity, MediaPlayerEntity):
         data = self.coordinator.data
         if not data.available:
             return MediaPlayerState.OFF
-        return STATE_MAP.get(data.playback_status or "", MediaPlayerState.IDLE)
+        status = data.playback_status or ""
+        return STATE_MAP.get(status, MediaPlayerState.IDLE)
 
     @property
     def media_position(self) -> int | None:
@@ -116,9 +117,7 @@ class TascamMediaPlayer(TascamEntity, MediaPlayerEntity):
         except TascamError as err:
             if not self.coordinator.data.available:
                 # The player is powered off; a failed command is expected.
-                _LOGGER.debug(
-                    "Command %s skipped, player off: %s", command, err
-                )
+                _LOGGER.debug("Command %s skipped, off: %s", command, err)
             else:
                 _LOGGER.warning("Command %s failed: %s", command, err)
         await self.coordinator.async_request_refresh()

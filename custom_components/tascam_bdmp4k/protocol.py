@@ -59,9 +59,8 @@ class _Pending:
         """Initialize the pending command."""
         self.is_request = is_request
         self.acked = False
-        self.future: asyncio.Future[str | None] = (
-            asyncio.get_running_loop().create_future()
-        )
+        loop = asyncio.get_running_loop()
+        self.future: asyncio.Future[str | None] = loop.create_future()
 
 
 class TascamClient:
@@ -85,7 +84,8 @@ class TascamClient:
         return self._writer is not None and not self._writer.is_closing()
 
     def set_notification_callback(
-        self, callback: Callable[[str], None] | None
+        self,
+        callback: Callable[[str], None] | None,
     ) -> None:
         """Register a callback for unsolicited status notifications."""
         self._notification_callback = callback
@@ -103,11 +103,10 @@ class TascamClient:
             self._reader = None
             self._writer = None
             raise TascamConnectionError(
-                f"Cannot connect to {self._host}:{self._port}: {err}"
+                f"Cannot connect to {self._host}:{self._port}: {err}",
             ) from err
-        self._listen_task = asyncio.get_running_loop().create_task(
-            self._listen()
-        )
+        loop = asyncio.get_running_loop()
+        self._listen_task = loop.create_task(self._listen())
         _LOGGER.debug("Connected to %s:%s", self._host, self._port)
 
     async def async_disconnect(self) -> None:
@@ -146,9 +145,7 @@ class TascamClient:
                 last_error = err
                 if attempt + 1 >= RETRY_ATTEMPTS:
                     break
-                _LOGGER.debug(
-                    "Retrying %s after connection failure: %s", command, err
-                )
+                _LOGGER.debug("Retrying %s after failure: %s", command, err)
                 await self.async_disconnect()
                 await asyncio.sleep(RETRY_DELAY)
         raise TascamConnectionError(str(last_error))
@@ -167,11 +164,14 @@ class TascamClient:
                 writer.write(f"{command}{CR}".encode("ascii"))
                 await writer.drain()
                 self._last_command = time.monotonic()
-                return await asyncio.wait_for(pending.future, RESPONSE_TIMEOUT)
+                return await asyncio.wait_for(
+                    pending.future,
+                    RESPONSE_TIMEOUT,
+                )
             except (OSError, TimeoutError) as err:
                 await self.async_disconnect()
                 raise TascamConnectionError(
-                    f"No reply to {command}: {err}"
+                    f"No reply to {command}: {err}",
                 ) from err
             finally:
                 self._pending = None
@@ -193,7 +193,8 @@ class TascamClient:
                 try:
                     if buffer:
                         chunk = await asyncio.wait_for(
-                            reader.read(256), timeout=FLUSH_TIMEOUT
+                            reader.read(256),
+                            timeout=FLUSH_TIMEOUT,
                         )
                     else:
                         chunk = await reader.read(256)
@@ -243,7 +244,7 @@ class TascamClient:
         if token == NACK:
             if pending is not None and not pending.future.done():
                 pending.future.set_exception(
-                    TascamNackError("Device replied NACK")
+                    TascamNackError("Device replied NACK"),
                 )
             return
         if token == ACK:

@@ -36,7 +36,8 @@ class TascamConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
+        self,
+        user_input: dict[str, Any] | None = None,
     ) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
@@ -66,7 +67,8 @@ class TascamConfigFlow(ConfigFlow, domain=DOMAIN):
 
                 if not errors:
                     return self.async_create_entry(
-                        title=DEFAULT_NAME, data=user_input
+                        title=DEFAULT_NAME,
+                        data=user_input,
                     )
 
         return self.async_show_form(
