@@ -1,0 +1,26 @@
+name: Ruff
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ruff:
+    name: Lint and format check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run ruff check
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check --output-format=github
+      - name: Run ruff format check
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: format --check
