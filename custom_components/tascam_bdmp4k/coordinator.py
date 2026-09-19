@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass, field
 from datetime import timedelta
+import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -43,7 +43,7 @@ class TascamState:
     raw: dict[str, str] = field(default_factory=dict)
 
 
-def _parse_hms(value: str) -> int | None:
+def parse_hms(value: str) -> int | None:
     """Parse an hhhmmss time string into seconds."""
     if len(value) != 7 or not value.isdigit():
         return None
@@ -51,7 +51,7 @@ def _parse_hms(value: str) -> int | None:
     return hours * 3600 + minutes * 60 + seconds
 
 
-def _parse_number(value: str) -> int | None:
+def parse_number(value: str) -> int | None:
     """Parse a 4-digit chapter/title number, handling UNKN."""
     if value.isdigit():
         return int(value)
@@ -59,7 +59,7 @@ def _parse_number(value: str) -> int | None:
 
 
 class TascamCoordinator(DataUpdateCoordinator[TascamState]):
-    """Poll the BD-MP4K over its single shared connection."""
+    """Poll the BD-MP4K and apply its pushed status notifications."""
 
     def __init__(
         self,
@@ -89,14 +89,18 @@ class TascamCoordinator(DataUpdateCoordinator[TascamState]):
             code = body.removeprefix("SST")
             state.raw["status"] = code
             state.playback_status = PLAYBACK_STATUS_MAP.get(code)
+            if state.playback_status is None:
+                _LOGGER.debug("Unknown playback status code: %s", code)
             state.available = True
             self.async_set_updated_data(state)
-            # Fetch times/chapter for the new transport state.
+            # Fetch times and chapter numbers for the new transport state.
             self.hass.async_create_task(self.async_request_refresh())
         elif body.startswith("MST"):
             code = body.removeprefix("MST")
             state.raw["disc"] = code
             state.disc_status = DISC_STATUS_MAP.get(code)
+            if state.disc_status is None:
+                _LOGGER.debug("Unknown disc status code: %s", code)
             state.available = True
             self.async_set_updated_data(state)
         else:
@@ -109,13 +113,14 @@ class TascamCoordinator(DataUpdateCoordinator[TascamState]):
         except TascamNackError:
             # The device NACKs requests that do not apply to the current
             # mode (e.g. remaining time while stopped). Treat as unknown.
+            _LOGGER.debug("Request %s not applicable right now", command)
             return None
         if answer is None:
             return None
         return answer.removeprefix("!7")
 
     async def _async_update_data(self) -> TascamState:
-        """Fetch state from the device."""
+        """Fetch the current state from the device."""
         state = TascamState()
         try:
             status = await self._query(REQ_STATUS)
@@ -150,21 +155,21 @@ class TascamCoordinator(DataUpdateCoordinator[TascamState]):
             if state.playback_status in ("playing", "paused"):
                 elapsed = await self._query(REQ_ELAPSED)
                 if elapsed is not None and elapsed.startswith("SET"):
-                    state.elapsed = _parse_hms(elapsed.removeprefix("SET"))
+                    state.elapsed = parse_hms(elapsed.removeprefix("SET"))
 
                 remaining = await self._query(REQ_REMAIN)
                 if remaining is not None and remaining.startswith("SRT"):
-                    state.remaining = _parse_hms(remaining.removeprefix("SRT"))
+                    state.remaining = parse_hms(remaining.removeprefix("SRT"))
 
                 chapter = await self._query(REQ_CURRENT_CHAPTER)
                 if chapter is not None and chapter.startswith("TNM"):
-                    state.current_chapter = _parse_number(
+                    state.current_chapter = parse_number(
                         chapter.removeprefix("TNM")
                     )
 
                 title = await self._query(REQ_CURRENT_TITLE)
                 if title is not None and title.startswith("GNM"):
-                    state.current_title = _parse_number(
+                    state.current_title = parse_number(
                         title.removeprefix("GNM")
                     )
         except TascamConnectionError as err:

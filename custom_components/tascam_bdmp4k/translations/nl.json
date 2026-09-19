@@ -12,8 +12,8 @@
     },
     "error": {
       "cannot_connect": "Verbinden mislukt",
-      "unknown": "Onverwachte fout",
-      "invalid_mac": "Ongeldig MAC-adres"
+      "invalid_mac": "Ongeldig MAC-adres",
+      "unknown": "Onverwachte fout"
     },
     "abort": {
       "already_configured": "Apparaat is al geconfigureerd"
@@ -22,64 +22,51 @@
   "entity": {
     "sensor": {
       "disc_status": {
-        "name": "Discstatus"
+        "name": "Discstatus",
+        "state": {
+          "no_disc": "Geen disc",
+          "disc_present": "Disc aanwezig",
+          "unformatted": "Onbekende disc",
+          "tray_open": "Lade open",
+          "tray_closed": "Lade gesloten",
+          "tray_error": "Ladefout"
+        }
       },
       "playback_status": {
-        "name": "Afspeelstatus"
+        "name": "Afspeelstatus",
+        "state": {
+          "playing": "Afspelen",
+          "stopped": "Gestopt",
+          "paused": "Gepauzeerd",
+          "slow_reverse": "Langzaam achteruit",
+          "slow_forward": "Langzaam vooruit",
+          "search_reverse": "Zoeken achteruit",
+          "search_forward": "Zoeken vooruit",
+          "setup": "Instellingenmenu",
+          "media_center": "Mediacenter",
+          "track_menu": "Trackmenu",
+          "home_menu": "Hoofdmenu"
+        }
       },
-      "elapsed_time": {
-        "name": "Verstreken tijd"
-      },
-      "remaining_time": {
-        "name": "Resterende tijd"
-      },
-      "current_chapter": {
-        "name": "Huidig hoofdstuk"
-      },
-      "current_title": {
-        "name": "Huidige titel"
-      }
+      "elapsed_time": {"name": "Verstreken tijd"},
+      "remaining_time": {"name": "Resterende tijd"},
+      "current_chapter": {"name": "Huidig hoofdstuk"},
+      "current_title": {"name": "Huidige titel"}
     },
     "button": {
-      "tray_open": {
-        "name": "Lade openen"
-      },
-      "tray_close": {
-        "name": "Lade sluiten"
-      },
-      "home": {
-        "name": "Home"
-      },
-      "enter": {
-        "name": "Enter"
-      },
-      "return": {
-        "name": "Terug"
-      },
-      "top_menu": {
-        "name": "Hoofdmenu"
-      },
-      "popup_menu": {
-        "name": "Pop-upmenu"
-      },
-      "setup_menu": {
-        "name": "Instellingenmenu"
-      },
-      "display_info": {
-        "name": "Info weergeven"
-      },
-      "subtitle_next": {
-        "name": "Volgende ondertitel"
-      },
-      "mute_on": {
-        "name": "Dempen aan"
-      },
-      "mute_off": {
-        "name": "Dempen uit"
-      },
-      "power_off": {
-        "name": "Uitschakelen (stand-by)"
-      }
+      "tray_open": {"name": "Lade openen"},
+      "tray_close": {"name": "Lade sluiten"},
+      "home": {"name": "Home"},
+      "enter": {"name": "Enter"},
+      "return": {"name": "Terug"},
+      "top_menu": {"name": "Hoofdmenu"},
+      "popup_menu": {"name": "Pop-upmenu"},
+      "setup_menu": {"name": "Instellingenmenu"},
+      "display_info": {"name": "Info weergeven"},
+      "subtitle_next": {"name": "Volgende ondertitel"},
+      "mute_on": {"name": "Dempen aan"},
+      "mute_off": {"name": "Dempen uit"},
+      "power_off": {"name": "Uitschakelen (stand-by)"}
     }
   }
 }

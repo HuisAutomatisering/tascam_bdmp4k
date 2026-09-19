@@ -18,10 +18,10 @@ Protocol notes (RS-232C/Ethernet spec v1.01):
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 import logging
 import re
 import time
-from collections.abc import Callable
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,11 +31,11 @@ ACK = "ack"
 NACK = "nack"
 
 COMMAND_INTERVAL = 0.03  # 30 ms minimum between commands (spec 4.3.6)
-RETRY_DELAY = 0.5  # pause before retrying a failed command
-RETRY_ATTEMPTS = 2  # initial attempt plus one retry
 RESPONSE_TIMEOUT = 1.0
 CONNECT_TIMEOUT = 5.0
 FLUSH_TIMEOUT = 0.05  # flush a partial buffer after 50 ms of silence
+RETRY_DELAY = 0.5  # pause before retrying a failed command
+RETRY_ATTEMPTS = 2  # initial attempt plus one retry
 
 _MESSAGE_RE = re.compile(r"(!7[A-Z0-9]{3}[^!\r\n]*|ack|nack)")
 
@@ -56,6 +56,7 @@ class _Pending:
     """An in-flight command awaiting its reply."""
 
     def __init__(self, is_request: bool) -> None:
+        """Initialize the pending command."""
         self.is_request = is_request
         self.acked = False
         self.future: asyncio.Future[str | None] = (
@@ -90,7 +91,7 @@ class TascamClient:
         self._notification_callback = callback
 
     async def async_connect(self) -> None:
-        """Open the TCP connection and start the listener."""
+        """Open the TCP connection and start the listener task."""
         if self.connected:
             return
         try:
@@ -110,21 +111,23 @@ class TascamClient:
         _LOGGER.debug("Connected to %s:%s", self._host, self._port)
 
     async def async_disconnect(self) -> None:
-        """Close the TCP connection and stop the listener."""
+        """Close the TCP connection and stop the listener task."""
         if (
             self._listen_task is not None
             and self._listen_task is not asyncio.current_task()
         ):
             self._listen_task.cancel()
         self._listen_task = None
-        if self._writer is not None:
-            self._writer.close()
-            try:
-                await self._writer.wait_closed()
-            except OSError:
-                pass
+        writer = self._writer
         self._reader = None
         self._writer = None
+        if writer is not None:
+            writer.close()
+            try:
+                await writer.wait_closed()
+            except OSError as err:
+                # The socket was already gone; nothing left to close.
+                _LOGGER.debug("Error while closing connection: %s", err)
         self._fail_pending(TascamConnectionError("Disconnected"))
 
     async def async_send(self, command: str) -> str | None:
@@ -135,34 +138,36 @@ class TascamClient:
         failure is retried once after a short delay before raising, since
         the player briefly refuses connections around power state changes.
         """
+        last_error: TascamConnectionError | None = None
         for attempt in range(RETRY_ATTEMPTS):
             try:
                 return await self._async_send_once(command)
             except TascamConnectionError as err:
+                last_error = err
                 if attempt + 1 >= RETRY_ATTEMPTS:
-                    raise
+                    break
                 _LOGGER.debug(
                     "Retrying %s after connection failure: %s", command, err
                 )
                 await self.async_disconnect()
                 await asyncio.sleep(RETRY_DELAY)
-        return None  # pragma: no cover — loop always returns or raises
+        raise TascamConnectionError(str(last_error))
 
     async def _async_send_once(self, command: str) -> str | None:
         """Send a command once over the shared connection."""
         async with self._lock:
             await self.async_connect()
             await self._respect_interval()
-            assert self._writer is not None
+            writer = self._writer
+            if writer is None:
+                raise TascamConnectionError("Connection lost before sending")
             pending = _Pending(is_request=command.startswith(f"{START}?"))
             self._pending = pending
             try:
-                self._writer.write(f"{command}{CR}".encode("ascii"))
-                await self._writer.drain()
+                writer.write(f"{command}{CR}".encode("ascii"))
+                await writer.drain()
                 self._last_command = time.monotonic()
-                return await asyncio.wait_for(
-                    pending.future, RESPONSE_TIMEOUT
-                )
+                return await asyncio.wait_for(pending.future, RESPONSE_TIMEOUT)
             except (OSError, TimeoutError) as err:
                 await self.async_disconnect()
                 raise TascamConnectionError(
@@ -178,18 +183,20 @@ class TascamClient:
             await asyncio.sleep(COMMAND_INTERVAL - elapsed)
 
     async def _listen(self) -> None:
-        """Continuously read the socket and dispatch tokens."""
-        assert self._reader is not None
+        """Continuously read the socket and dispatch incoming tokens."""
+        reader = self._reader
+        if reader is None:
+            return
         buffer = ""
         try:
             while True:
                 try:
                     if buffer:
                         chunk = await asyncio.wait_for(
-                            self._reader.read(256), timeout=FLUSH_TIMEOUT
+                            reader.read(256), timeout=FLUSH_TIMEOUT
                         )
                     else:
-                        chunk = await self._reader.read(256)
+                        chunk = await reader.read(256)
                 except TimeoutError:
                     # No more data: the partial tail is a complete token.
                     self._dispatch_buffer(buffer, final=True)
@@ -201,29 +208,30 @@ class TascamClient:
                 buffer = self._dispatch_buffer(buffer, final=False)
         except asyncio.CancelledError:
             raise
-        except TascamError as err:
+        except (TascamError, OSError) as err:
             _LOGGER.debug("Listener stopped: %s", err)
-            self._fail_pending(err)
+            self._fail_pending(TascamConnectionError(str(err)))
             self._listen_task = None
-            if self._writer is not None:
-                self._writer.close()
+            writer = self._writer
             self._reader = None
             self._writer = None
+            if writer is not None:
+                writer.close()
 
     def _dispatch_buffer(self, buffer: str, final: bool) -> str:
-        """Dispatch complete tokens; return the unconsumed tail."""
+        """Dispatch complete tokens and return the unconsumed tail."""
         tail = ""
         matches = _MESSAGE_RE.findall(buffer)
         if not final and matches:
             last = matches[-1]
             if buffer.endswith(last) and last.startswith(START):
-                # Possibly incomplete; hold until more data or a flush.
+                # Possibly incomplete; hold it until more data or a flush.
                 tail = last
                 matches = matches[:-1]
         for token in matches:
             self._dispatch(token.strip("\r\n+ "))
         if not final and not matches and not tail:
-            # Possibly a partial 'ack'/'nack'/start character.
+            # Possibly a partial 'ack'/'nack' or start character.
             tail = buffer[-8:]
         return tail
 
@@ -255,7 +263,7 @@ class TascamClient:
             ):
                 pending.future.set_result(token)
                 return
-            # Unsolicited status notification: ack it (spec 4.4.3).
+            # Unsolicited status notification: acknowledge it (spec 4.4.3).
             if self._writer is not None:
                 self._writer.write(f"{ACK}{CR}".encode("ascii"))
             _LOGGER.debug("Notification: %s", token)
@@ -263,6 +271,6 @@ class TascamClient:
                 self._notification_callback(token)
 
     def _fail_pending(self, err: TascamError) -> None:
-        """Fail the in-flight command, if any."""
+        """Fail the in-flight command, if there is one."""
         if self._pending is not None and not self._pending.future.done():
             self._pending.future.set_exception(err)

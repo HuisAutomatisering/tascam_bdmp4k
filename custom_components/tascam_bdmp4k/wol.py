@@ -1,7 +1,7 @@
 """Wake-on-LAN support for the Tascam BD-MP4K.
 
 Power-on over the Ethernet control protocol is not supported by the
-device; the spec prescribes Wake-on-LAN instead.
+device; the protocol specification prescribes Wake-on-LAN instead.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ def normalize_mac(mac: str) -> str | None:
 
 
 async def async_send_magic_packet(hass: HomeAssistant, mac: str) -> None:
-    """Broadcast a Wake-on-LAN magic packet for the given MAC."""
+    """Broadcast a Wake-on-LAN magic packet for the given MAC address."""
     raw = bytes.fromhex(mac.replace(":", ""))
     packet = b"\xff" * 6 + raw * 16
 

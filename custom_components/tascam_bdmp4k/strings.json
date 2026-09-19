@@ -12,8 +12,8 @@
     },
     "error": {
       "cannot_connect": "Failed to connect",
-      "unknown": "Unexpected error",
-      "invalid_mac": "Invalid MAC address"
+      "invalid_mac": "Invalid MAC address",
+      "unknown": "Unexpected error"
     },
     "abort": {
       "already_configured": "Device is already configured"
@@ -22,64 +22,51 @@
   "entity": {
     "sensor": {
       "disc_status": {
-        "name": "Disc status"
+        "name": "Disc status",
+        "state": {
+          "no_disc": "No disc",
+          "disc_present": "Disc present",
+          "unformatted": "Unknown disc",
+          "tray_open": "Tray open",
+          "tray_closed": "Tray closed",
+          "tray_error": "Tray error"
+        }
       },
       "playback_status": {
-        "name": "Playback status"
+        "name": "Playback status",
+        "state": {
+          "playing": "Playing",
+          "stopped": "Stopped",
+          "paused": "Paused",
+          "slow_reverse": "Slow reverse",
+          "slow_forward": "Slow forward",
+          "search_reverse": "Search reverse",
+          "search_forward": "Search forward",
+          "setup": "Setup menu",
+          "media_center": "Media center",
+          "track_menu": "Track menu",
+          "home_menu": "Home menu"
+        }
       },
-      "elapsed_time": {
-        "name": "Elapsed time"
-      },
-      "remaining_time": {
-        "name": "Remaining time"
-      },
-      "current_chapter": {
-        "name": "Current chapter"
-      },
-      "current_title": {
-        "name": "Current title"
-      }
+      "elapsed_time": {"name": "Elapsed time"},
+      "remaining_time": {"name": "Remaining time"},
+      "current_chapter": {"name": "Current chapter"},
+      "current_title": {"name": "Current title"}
     },
     "button": {
-      "tray_open": {
-        "name": "Open tray"
-      },
-      "tray_close": {
-        "name": "Close tray"
-      },
-      "home": {
-        "name": "Home"
-      },
-      "enter": {
-        "name": "Enter"
-      },
-      "return": {
-        "name": "Return"
-      },
-      "top_menu": {
-        "name": "Top menu"
-      },
-      "popup_menu": {
-        "name": "Popup menu"
-      },
-      "setup_menu": {
-        "name": "Setup menu"
-      },
-      "display_info": {
-        "name": "Display info"
-      },
-      "subtitle_next": {
-        "name": "Next subtitle"
-      },
-      "mute_on": {
-        "name": "Mute on"
-      },
-      "mute_off": {
-        "name": "Mute off"
-      },
-      "power_off": {
-        "name": "Power off (standby)"
-      }
+      "tray_open": {"name": "Open tray"},
+      "tray_close": {"name": "Close tray"},
+      "home": {"name": "Home"},
+      "enter": {"name": "Enter"},
+      "return": {"name": "Return"},
+      "top_menu": {"name": "Top menu"},
+      "popup_menu": {"name": "Popup menu"},
+      "setup_menu": {"name": "Setup menu"},
+      "display_info": {"name": "Display info"},
+      "subtitle_next": {"name": "Next subtitle"},
+      "mute_on": {"name": "Mute on"},
+      "mute_off": {"name": "Mute off"},
+      "power_off": {"name": "Power off (standby)"}
     }
   }
 }

@@ -73,7 +73,7 @@ async def async_setup_entry(
     entry: TascamConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up sensors from a config entry."""
+    """Set up the sensors from a config entry."""
     coordinator = entry.runtime_data
     async_add_entities(
         TascamSensor(coordinator, description) for description in SENSORS

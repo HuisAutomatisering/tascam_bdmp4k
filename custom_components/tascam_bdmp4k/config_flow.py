@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import voluptuous as vol
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+import voluptuous as vol
 
 from .const import (
     CONF_HOST,
@@ -43,36 +43,31 @@ class TascamConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             host = user_input[CONF_HOST]
             port = user_input[CONF_PORT]
+
             if CONF_MAC in user_input:
                 mac = normalize_mac(user_input[CONF_MAC])
                 if mac is None:
                     errors[CONF_MAC] = "invalid_mac"
                 else:
                     user_input[CONF_MAC] = mac
+
             await self.async_set_unique_id(f"{host}:{port}")
             self._abort_if_unique_id_configured()
 
-            if errors:
-                return self.async_show_form(
-                    step_id="user",
-                    data_schema=STEP_USER_DATA_SCHEMA,
-                    errors=errors,
-                )
-            client = TascamClient(host, port)
-            try:
-                await client.async_connect()
-            except TascamError:
-                errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
-            else:
-                await client.async_disconnect()
-                return self.async_create_entry(
-                    title=DEFAULT_NAME, data=user_input
-                )
-            finally:
-                await client.async_disconnect()
+            if not errors:
+                client = TascamClient(host, port)
+                try:
+                    await client.async_connect()
+                except TascamError as err:
+                    _LOGGER.debug("Connection test failed: %s", err)
+                    errors["base"] = "cannot_connect"
+                finally:
+                    await client.async_disconnect()
+
+                if not errors:
+                    return self.async_create_entry(
+                        title=DEFAULT_NAME, data=user_input
+                    )
 
         return self.async_show_form(
             step_id="user",

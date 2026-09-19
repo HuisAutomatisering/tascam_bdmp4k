@@ -3,10 +3,10 @@
   "name": "Tascam BD-MP4K",
   "codeowners": ["@HuisAutomatisering"],
   "config_flow": true,
-  "documentation": "https://github.com/HuisAutomatisering/Tascam-Blu-ray-player",
+  "documentation": "https://github.com/HuisAutomatisering/tascam_bdmp4k",
   "integration_type": "device",
-  "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/HuisAutomatisering/Tascam-Blu-ray-player/issues",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/HuisAutomatisering/tascam_bdmp4k/issues",
   "requirements": [],
-  "version": "2.1.2"
+  "version": "2.2.0"
 }

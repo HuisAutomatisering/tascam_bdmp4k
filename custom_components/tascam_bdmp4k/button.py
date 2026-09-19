@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
+import logging
 
-from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
+from homeassistant.components.button import (
+    ButtonEntity,
+    ButtonEntityDescription,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -40,43 +43,69 @@ class TascamButtonDescription(ButtonEntityDescription):
 
 BUTTONS: tuple[TascamButtonDescription, ...] = (
     TascamButtonDescription(
-        key="tray_open", translation_key="tray_open", command=CMD_TRAY_OPEN
+        key="tray_open",
+        translation_key="tray_open",
+        command=CMD_TRAY_OPEN,
     ),
     TascamButtonDescription(
-        key="tray_close", translation_key="tray_close", command=CMD_TRAY_CLOSE
+        key="tray_close",
+        translation_key="tray_close",
+        command=CMD_TRAY_CLOSE,
     ),
     TascamButtonDescription(
-        key="home", translation_key="home", command=CMD_HOME
+        key="home",
+        translation_key="home",
+        command=CMD_HOME,
     ),
     TascamButtonDescription(
-        key="enter", translation_key="enter", command=CMD_ENTER
+        key="enter",
+        translation_key="enter",
+        command=CMD_ENTER,
     ),
     TascamButtonDescription(
-        key="return", translation_key="return", command=CMD_RETURN
+        key="return",
+        translation_key="return",
+        command=CMD_RETURN,
     ),
     TascamButtonDescription(
-        key="top_menu", translation_key="top_menu", command=CMD_TOP_MENU
+        key="top_menu",
+        translation_key="top_menu",
+        command=CMD_TOP_MENU,
     ),
     TascamButtonDescription(
-        key="popup_menu", translation_key="popup_menu", command=CMD_POPUP_MENU
+        key="popup_menu",
+        translation_key="popup_menu",
+        command=CMD_POPUP_MENU,
     ),
     TascamButtonDescription(
-        key="setup_menu", translation_key="setup_menu", command=CMD_SETUP_MENU
+        key="setup_menu",
+        translation_key="setup_menu",
+        command=CMD_SETUP_MENU,
     ),
     TascamButtonDescription(
-        key="display_info", translation_key="display_info", command=CMD_DISPLAY
+        key="display_info",
+        translation_key="display_info",
+        command=CMD_DISPLAY,
     ),
     TascamButtonDescription(
-        key="subtitle_next", translation_key="subtitle_next", command=CMD_SUBTITLE
+        key="subtitle_next",
+        translation_key="subtitle_next",
+        command=CMD_SUBTITLE,
     ),
     TascamButtonDescription(
-        key="mute_on", translation_key="mute_on", command=CMD_MUTE_ON
+        key="mute_on",
+        translation_key="mute_on",
+        command=CMD_MUTE_ON,
     ),
     TascamButtonDescription(
-        key="mute_off", translation_key="mute_off", command=CMD_MUTE_OFF
+        key="mute_off",
+        translation_key="mute_off",
+        command=CMD_MUTE_OFF,
     ),
     TascamButtonDescription(
-        key="power_off", translation_key="power_off", command=CMD_POWER_OFF
+        key="power_off",
+        translation_key="power_off",
+        command=CMD_POWER_OFF,
     ),
 )
 
@@ -86,7 +115,7 @@ async def async_setup_entry(
     entry: TascamConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up buttons from a config entry."""
+    """Set up the buttons from a config entry."""
     coordinator = entry.runtime_data
     async_add_entities(
         TascamButton(coordinator, description) for description in BUTTONS
@@ -108,15 +137,15 @@ class TascamButton(TascamEntity, ButtonEntity):
         self.entity_description = description
 
     async def async_press(self) -> None:
-        """Send the command."""
+        """Send the command to the device."""
+        command = self.entity_description.command
         try:
-            await self.coordinator.client.async_send(
-                self.entity_description.command
-            )
+            await self.coordinator.client.async_send(command)
         except TascamError as err:
-            command = self.entity_description.command
             if not self.coordinator.data.available:
-                _LOGGER.debug("Command %s skipped, player off: %s", command, err)
+                _LOGGER.debug(
+                    "Command %s skipped, player off: %s", command, err
+                )
             else:
                 _LOGGER.warning("Command %s failed: %s", command, err)
         await self.coordinator.async_request_refresh()

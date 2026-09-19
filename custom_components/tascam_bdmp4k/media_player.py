@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 import logging
 
 from homeassistant.components.media_player import (
@@ -16,12 +17,12 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     CMD_PAUSE,
-    CONF_MAC,
     CMD_PLAY,
     CMD_POWER_OFF,
     CMD_SKIP_NEXT,
     CMD_SKIP_PREV,
     CMD_STOP,
+    CONF_MAC,
 )
 from .coordinator import TascamConfigEntry, TascamCoordinator
 from .entity import TascamEntity
@@ -33,6 +34,7 @@ _LOGGER = logging.getLogger(__name__)
 STATE_MAP = {
     "playing": MediaPlayerState.PLAYING,
     "paused": MediaPlayerState.PAUSED,
+    "stopped": MediaPlayerState.IDLE,
     "slow_forward": MediaPlayerState.PLAYING,
     "slow_reverse": MediaPlayerState.PLAYING,
     "search_forward": MediaPlayerState.PLAYING,
@@ -76,7 +78,7 @@ class TascamMediaPlayer(TascamEntity, MediaPlayerEntity):
 
     @property
     def available(self) -> bool:
-        """Keep the player available so it can show the off state."""
+        """Keep the player available so it can report the off state."""
         return self.coordinator.last_update_success
 
     @property
@@ -93,42 +95,44 @@ class TascamMediaPlayer(TascamEntity, MediaPlayerEntity):
         return self.coordinator.data.elapsed
 
     @property
-    def media_position_updated_at(self):
-        """Return when the position was last updated."""
+    def media_position_updated_at(self) -> datetime | None:
+        """Return when the media position was last updated."""
         if self.coordinator.data.elapsed is None:
             return None
         return dt_util.utcnow()
 
     @property
     def media_duration(self) -> int | None:
-        """Return the duration, derived from elapsed + remaining."""
+        """Return the duration, derived from elapsed plus remaining time."""
         data = self.coordinator.data
         if data.elapsed is None or data.remaining is None:
             return None
         return data.elapsed + data.remaining
 
     async def _async_send(self, command: str) -> None:
-        """Send a command and refresh state."""
+        """Send a command and refresh the state."""
         try:
             await self.coordinator.client.async_send(command)
         except TascamError as err:
             if not self.coordinator.data.available:
-                # Player is powered off; a failed command is expected.
-                _LOGGER.debug("Command %s skipped, player off: %s", command, err)
+                # The player is powered off; a failed command is expected.
+                _LOGGER.debug(
+                    "Command %s skipped, player off: %s", command, err
+                )
             else:
                 _LOGGER.warning("Command %s failed: %s", command, err)
         await self.coordinator.async_request_refresh()
 
     async def async_media_play(self) -> None:
-        """Send play command."""
+        """Send the play command."""
         await self._async_send(CMD_PLAY)
 
     async def async_media_pause(self) -> None:
-        """Send pause command."""
+        """Send the pause command."""
         await self._async_send(CMD_PAUSE)
 
     async def async_media_stop(self) -> None:
-        """Send stop command."""
+        """Send the stop command."""
         await self._async_send(CMD_STOP)
 
     async def async_media_next_track(self) -> None:
@@ -140,15 +144,11 @@ class TascamMediaPlayer(TascamEntity, MediaPlayerEntity):
         await self._async_send(CMD_SKIP_PREV)
 
     async def async_turn_off(self) -> None:
-        """Put the device in standby.
-
-        Note: power on over Ethernet is not supported by the protocol;
-        use Wake-on-LAN instead.
-        """
+        """Put the device in standby."""
         await self._async_send(CMD_POWER_OFF)
 
     async def async_turn_on(self) -> None:
-        """Wake the device via Wake-on-LAN."""
+        """Wake the device using Wake-on-LAN."""
         if self._mac is None:
             return
         await async_send_magic_packet(self.hass, self._mac)
