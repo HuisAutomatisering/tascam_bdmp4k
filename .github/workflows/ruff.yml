@@ -12,17 +12,17 @@ permissions:
 jobs:
   ruff:
     name: Lint and format check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install Ruff
+        run: pip install ruff==0.16.8
       - name: Run ruff check
-        uses: astral-sh/ruff-action@v3
-        with:
-          version: "0.16.8"
-          args: check --output-format=github
+        run: ruff check --output-format=github .
       - name: Run ruff format check
-        uses: astral-sh/ruff-action@v3
-        with:
-          version: "0.16.8"
-          args: format --check
+        run: ruff format --check .
