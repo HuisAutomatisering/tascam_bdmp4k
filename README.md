@@ -1,9 +1,11 @@
 # Tascam BD-MP4K — Home Assistant integration
 
-[![hassfest](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/hassfest.yml/badge.svg)](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/hassfest.yml)
-[![HACS validation](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/hacs.yml/badge.svg)](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/hacs.yml)
-[![CodeQL](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/codeql.yml/badge.svg)](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/codeql.yml)
-[![Ruff](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/ruff.yml/badge.svg)](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/ruff.yml)
+[![hassfest](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/hassfest.yml/badge.svg?branch=main)](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/hassfest.yml)
+[![HACS validation](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/hacs.yml/badge.svg?branch=main)](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/hacs.yml)
+[![CodeQL](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/codeql.yml)
+[![Ruff](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/ruff.yml/badge.svg?branch=main)](https://github.com/HuisAutomatisering/tascam_bdmp4k/actions/workflows/ruff.yml)
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=HuisAutomatisering&repository=tascam_bdmp4k&category=integration)
 
 [![HACS custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -31,6 +33,13 @@ Assistant over its Ethernet control protocol (TCP port 9030).
 
 ### HACS (recommended)
 
+Click the badge above, or
+[this link](https://my.home-assistant.io/redirect/hacs_repository/?owner=HuisAutomatisering&repository=tascam_bdmp4k&category=integration),
+to open this repository directly in HACS on your own Home Assistant
+instance, then download it and restart Home Assistant.
+
+Manually adding it works too:
+
 1. In HACS, open the three-dot menu → **Custom repositories**.
 2. Add `https://github.com/HuisAutomatisering/tascam_bdmp4k`
    with category **Integration**.
@@ -45,7 +54,8 @@ Assistant over its Ethernet control protocol (TCP port 9030).
 ### Configuration
 
 Go to **Settings → Devices & Services → Add Integration** and search for
-**Tascam BD-MP4K**. Enter the IP address of the player; the port is
+**Tascam BD-MP4K**, or use
+[this link](https://my.home-assistant.io/redirect/config_flow_start/?domain=tascam_bdmp4k). Enter the IP address of the player; the port is
 9030 and fixed by the device.
 
 Optionally enter the player's **MAC address** to enable power on via

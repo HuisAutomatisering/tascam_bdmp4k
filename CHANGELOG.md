@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.1
+
+- Added the My Home Assistant "Open in HACS" badge, so the repository can
+  be added to HACS with one click
+- Added a My Home Assistant link for starting the config flow
+- Pinned the workflow status badges to the main branch
+
 ## 2.3.0
 
 - Renamed entities so that Home Assistant's alphabetical ordering groups
