@@ -34,7 +34,9 @@ async def test_setup_and_unload(
     """The entry loads, creates the device and entities, and unloads cleanly."""
     await _setup(hass, mock_config_entry)
 
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, mock_config_entry.entry_id)})
+    device = dr.async_get(hass).async_get_device_by_identifier(
+        (DOMAIN, mock_config_entry.entry_id), mock_config_entry.entry_id
+    )
     assert device is not None
     assert device.name == "Tascam BD-MP4K"
     assert device.model == "BD-MP4K"
