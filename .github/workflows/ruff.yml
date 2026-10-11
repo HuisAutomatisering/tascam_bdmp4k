@@ -11,18 +11,22 @@ permissions:
 
 jobs:
   ruff:
-    name: Lint and format check
+    name: Ruff
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
+      - name: Check out the repository
         uses: actions/checkout@v7
+
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
           python-version: "3.13"
+
       - name: Install Ruff
         run: pip install ruff==0.16.8
-      - name: Run ruff check
-        run: ruff check --output-format=github .
-      - name: Run ruff format check
-        run: ruff format --check .
+
+      - name: Ruff check
+        run: ruff check --output-format github .
+
+      - name: Ruff format
+        run: ruff format --check --diff .
