@@ -7,8 +7,8 @@ updates. Please update to the newest release before reporting an issue.
 
 | Version | Supported |
 | ------- | --------- |
-| 2.2.x   | Yes       |
-| < 2.2   | No        |
+| 2.4.x   | Yes       |
+| < 2.4   | No        |
 
 ## Reporting a vulnerability
 

@@ -1,25 +1,18 @@
-# Brand assets
+# Brand
 
-This folder is reserved for brand assets (logo and icon) used by the
-integration.
+The icon and logo that Home Assistant and HACS show for this integration come from the
+official [home-assistant/brands](https://github.com/home-assistant/brands) repository,
+folder `custom_integrations/tascam_bdmp4k`. No artwork is bundled with the integration
+itself.
 
-**No logo files are included in this repository.** The Tascam and TEAC
-logos are trademarks of TEAC Corporation, and this project has no
-permission to redistribute them.
+If you want different artwork in your own installation, the brands repository layout is:
 
-If you want the integration to show a logo in Home Assistant, you have
-two options:
+| File | Size | Used for |
+|---|---|---|
+| `icon.png` | 256×256 | Integration icon |
+| `icon@2x.png` | 512×512 | High-DPI integration icon |
+| `logo.png` | max 256 high | Logo on the integration page |
+| `logo@2x.png` | max 512 high | High-DPI logo |
 
-1. **Locally**: place your own `logo.png` and `icon.png` here and point
-   your Home Assistant setup at them.
-2. **Officially**: Home Assistant serves integration logos from the
-   [home-assistant/brands](https://github.com/home-assistant/brands)
-   repository. Adding the brand there requires permission from the
-   trademark owner for that use.
-
-Recommended sizes if you add files yourself:
-
-| File       | Size            | Notes                     |
-| ---------- | --------------- | ------------------------- |
-| `icon.png` | 256×256 px      | Square, transparent PNG   |
-| `logo.png` | max 512×512 px  | Wordmark, transparent PNG |
+Tascam and TEAC are trademarks of TEAC Corporation. This project is not affiliated with or
+endorsed by TEAC.

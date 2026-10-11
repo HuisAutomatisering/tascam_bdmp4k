@@ -117,9 +117,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the buttons from a config entry."""
     coordinator = entry.runtime_data
-    async_add_entities(
-        TascamButton(coordinator, description) for description in BUTTONS
-    )
+    async_add_entities(TascamButton(coordinator, description) for description in BUTTONS)
 
 
 class TascamButton(TascamEntity, ButtonEntity):

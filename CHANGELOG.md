@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.4.0
+
+- Aligned with the Bronze tier of the Home Assistant integration quality scale; the status
+  per rule is recorded in `quality_scale.yaml`
+- Added tests for the config flow, setup, polling, push notifications, the entities and the
+  protocol client, plus a Tests workflow and badge
+- The config flow explains each field, re-fills the form after an error, ignores an empty
+  MAC address, and reports unexpected errors instead of failing silently
+- The HACS brands check is enabled again: the icon and logo come from the
+  home-assistant/brands repository
+- Fixed: a message split across two network reads could be lost, which caused a missed reply
+  and a retry; a status notification running straight into a reply is now told apart too
+- The media position now carries the time it was read from the player
+- Closing the connection now waits for the reader task to stop
+- Moved the Ruff configuration to `ruff.toml` (line length 100) and reformatted the code
+- README: entity table, configuration fields, removal instructions and a quality scale section
+
 ## 2.3.1
 
 - Added the My Home Assistant "Open in HACS" badge, so the repository can

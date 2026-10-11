@@ -2,12 +2,18 @@
   "config": {
     "step": {
       "user": {
+        "title": "Set up a Tascam BD-MP4K",
+        "description": "Enter the network address of your Tascam BD-MP4K Blu-ray player.",
         "data": {
           "host": "Host",
           "port": "Port",
-          "mac": "MAC address (optional, for Wake-on-LAN power on)"
+          "mac": "MAC address (optional)"
         },
-        "description": "Enter the IP address of your Tascam BD-MP4K. The player uses TCP port 9030 (fixed). Add the MAC address to enable power on via Wake-on-LAN."
+        "data_description": {
+          "host": "IP address or host name of the player.",
+          "port": "TCP control port. The player always uses 9030.",
+          "mac": "Needed to switch the player on with Wake-on-LAN, for example aa:bb:cc:dd:ee:ff. Also enable network standby on the player itself."
+        }
       }
     },
     "error": {
@@ -48,25 +54,59 @@
           "home_menu": "Home menu"
         }
       },
-      "elapsed_time": {"name": "Time elapsed"},
-      "remaining_time": {"name": "Time remaining"},
-      "current_chapter": {"name": "Current chapter"},
-      "current_title": {"name": "Current title"}
+      "elapsed_time": {
+        "name": "Time elapsed"
+      },
+      "remaining_time": {
+        "name": "Time remaining"
+      },
+      "current_chapter": {
+        "name": "Current chapter"
+      },
+      "current_title": {
+        "name": "Current title"
+      }
     },
     "button": {
-      "tray_open": {"name": "Tray open"},
-      "tray_close": {"name": "Tray close"},
-      "home": {"name": "Menu home"},
-      "enter": {"name": "Menu enter"},
-      "return": {"name": "Menu return"},
-      "top_menu": {"name": "Menu top (disc)"},
-      "popup_menu": {"name": "Menu popup"},
-      "setup_menu": {"name": "Menu setup"},
-      "display_info": {"name": "Display info"},
-      "subtitle_next": {"name": "Subtitle next"},
-      "mute_on": {"name": "Mute on"},
-      "mute_off": {"name": "Mute off"},
-      "power_off": {"name": "Power off (standby)"}
+      "tray_open": {
+        "name": "Tray open"
+      },
+      "tray_close": {
+        "name": "Tray close"
+      },
+      "home": {
+        "name": "Menu home"
+      },
+      "enter": {
+        "name": "Menu enter"
+      },
+      "return": {
+        "name": "Menu return"
+      },
+      "top_menu": {
+        "name": "Menu top (disc)"
+      },
+      "popup_menu": {
+        "name": "Menu popup"
+      },
+      "setup_menu": {
+        "name": "Menu setup"
+      },
+      "display_info": {
+        "name": "Display info"
+      },
+      "subtitle_next": {
+        "name": "Subtitle next"
+      },
+      "mute_on": {
+        "name": "Mute on"
+      },
+      "mute_off": {
+        "name": "Mute off"
+      },
+      "power_off": {
+        "name": "Power off (standby)"
+      }
     }
   }
 }

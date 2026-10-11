@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
 
 from .const import (
     DEFAULT_SCAN_INTERVAL,
@@ -37,6 +38,7 @@ class TascamState:
     disc_status: str | None = None
     playback_status: str | None = None
     elapsed: int | None = None  # seconds
+    position_updated_at: datetime | None = None
     remaining: int | None = None  # seconds
     current_chapter: int | None = None
     current_title: int | None = None
@@ -158,6 +160,7 @@ class TascamCoordinator(DataUpdateCoordinator[TascamState]):
                 elapsed = await self._query(REQ_ELAPSED)
                 if elapsed is not None and elapsed.startswith("SET"):
                     state.elapsed = parse_hms(elapsed.removeprefix("SET"))
+                    state.position_updated_at = dt_util.utcnow()
 
                 remaining = await self._query(REQ_REMAIN)
                 if remaining is not None and remaining.startswith("SRT"):

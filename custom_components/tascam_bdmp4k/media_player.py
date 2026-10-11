@@ -11,9 +11,9 @@ from homeassistant.components.media_player import (
     MediaPlayerState,
     MediaType,
 )
+from homeassistant.const import CONF_MAC
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util import dt as dt_util
 
 from .const import (
     CMD_PAUSE,
@@ -22,7 +22,6 @@ from .const import (
     CMD_SKIP_NEXT,
     CMD_SKIP_PREV,
     CMD_STOP,
-    CONF_MAC,
 )
 from .coordinator import TascamConfigEntry, TascamCoordinator
 from .entity import TascamEntity
@@ -97,10 +96,8 @@ class TascamMediaPlayer(TascamEntity, MediaPlayerEntity):
 
     @property
     def media_position_updated_at(self) -> datetime | None:
-        """Return when the media position was last updated."""
-        if self.coordinator.data.elapsed is None:
-            return None
-        return dt_util.utcnow()
+        """Return when the media position was read from the player."""
+        return self.coordinator.data.position_updated_at
 
     @property
     def media_duration(self) -> int | None:

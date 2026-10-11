@@ -8,10 +8,6 @@ DEFAULT_PORT = 9030
 DEFAULT_NAME = "Tascam BD-MP4K"
 DEFAULT_SCAN_INTERVAL = 10
 
-CONF_HOST = "host"
-CONF_PORT = "port"
-CONF_MAC = "mac"
-
 MANUFACTURER = "Tascam (TEAC Corporation)"
 MODEL = "BD-MP4K"
 

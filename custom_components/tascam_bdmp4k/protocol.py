@@ -37,7 +37,14 @@ FLUSH_TIMEOUT = 0.05  # flush a partial buffer after 50 ms of silence
 RETRY_DELAY = 0.5  # pause before retrying a failed command
 RETRY_ATTEMPTS = 2  # initial attempt plus one retry
 
-_MESSAGE_RE = re.compile(r"(!7[A-Z0-9]{3}[^!\r\n]*|ack|nack)")
+# A device message is "!7", a three character code and parameters made of upper case
+# letters, digits, "+" and "-" (spec 5.3). Replies are the lower case "ack" or "nack",
+# so a message running straight into a reply still splits correctly.
+_MESSAGE_RE = re.compile(r"!7[A-Z0-9]{3}[A-Z0-9+\-]*|nack|ack")
+
+# Longest unparsed remainder worth keeping between reads: enough for a partial "!7XY",
+# "nac" or "ack+" to complete with the next read.
+_MAX_REMAINDER = 16
 
 
 class TascamError(Exception):
@@ -111,12 +118,13 @@ class TascamClient:
 
     async def async_disconnect(self) -> None:
         """Close the TCP connection and stop the listener task."""
-        if (
-            self._listen_task is not None
-            and self._listen_task is not asyncio.current_task()
-        ):
-            self._listen_task.cancel()
+        task = self._listen_task
         self._listen_task = None
+        if task is not None and task is not asyncio.current_task():
+            task.cancel()
+            # Wait for the cancellation to finish, so no reader task outlives
+            # the connection it was reading from.
+            await asyncio.wait({task})
         writer = self._writer
         self._reader = None
         self._writer = None
@@ -220,21 +228,22 @@ class TascamClient:
                 writer.close()
 
     def _dispatch_buffer(self, buffer: str, final: bool) -> str:
-        """Dispatch complete tokens and return the unconsumed tail."""
-        tail = ""
-        matches = _MESSAGE_RE.findall(buffer)
-        if not final and matches:
-            last = matches[-1]
-            if buffer.endswith(last) and last.startswith(START):
-                # Possibly incomplete; hold it until more data or a flush.
-                tail = last
-                matches = matches[:-1]
-        for token in matches:
-            self._dispatch(token.strip("\r\n+ "))
-        if not final and not matches and not tail:
-            # Possibly a partial 'ack'/'nack' or start character.
-            tail = buffer[-8:]
-        return tail
+        """Dispatch the complete messages in the buffer and return what is left over.
+
+        A message at the very end of the buffer may still be growing, so it is held
+        back until more data arrives or the line stays quiet (``final``). Text after
+        the last message is kept too, as it may be the start of the next one.
+        """
+        matches = list(_MESSAGE_RE.finditer(buffer))
+        remainder = buffer[matches[-1].end() :] if matches else buffer
+        if not final and matches and not remainder and matches[-1].group().startswith(START):
+            remainder = matches.pop().group()
+        for match in matches:
+            # A trailing "+" belongs to an "ack+answer" separator, not to the message.
+            self._dispatch(match.group().rstrip("+"))
+        if final:
+            return ""
+        return remainder[-_MAX_REMAINDER:]
 
     def _dispatch(self, token: str) -> None:
         """Route one token to the pending command or the callback."""

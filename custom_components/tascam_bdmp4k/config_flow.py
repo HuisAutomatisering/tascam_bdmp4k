@@ -5,17 +5,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 import voluptuous as vol
 
-from .const import (
-    CONF_HOST,
-    CONF_MAC,
-    CONF_PORT,
-    DEFAULT_NAME,
-    DEFAULT_PORT,
-    DOMAIN,
-)
+from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.const import CONF_HOST, CONF_MAC, CONF_PORT
+
+from .const import DEFAULT_NAME, DEFAULT_PORT, DOMAIN
 from .protocol import TascamClient, TascamError
 from .wol import normalize_mac
 
@@ -35,22 +30,19 @@ class TascamConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    async def async_step_user(
-        self,
-        user_input: dict[str, Any] | None = None,
-    ) -> ConfigFlowResult:
-        """Handle the initial step."""
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Handle a manual setup: address, port and optional MAC address."""
         errors: dict[str, str] = {}
         if user_input is not None:
-            host = user_input[CONF_HOST]
+            host = user_input[CONF_HOST].strip()
             port = user_input[CONF_PORT]
+            data: dict[str, Any] = {CONF_HOST: host, CONF_PORT: port}
 
-            if CONF_MAC in user_input:
-                mac = normalize_mac(user_input[CONF_MAC])
-                if mac is None:
+            if raw_mac := user_input.get(CONF_MAC, "").strip():
+                if (mac := normalize_mac(raw_mac)) is None:
                     errors[CONF_MAC] = "invalid_mac"
                 else:
-                    user_input[CONF_MAC] = mac
+                    data[CONF_MAC] = mac
 
             await self.async_set_unique_id(f"{host}:{port}")
             self._abort_if_unique_id_configured()
@@ -60,19 +52,18 @@ class TascamConfigFlow(ConfigFlow, domain=DOMAIN):
                 try:
                     await client.async_connect()
                 except TascamError as err:
-                    _LOGGER.debug("Connection test failed: %s", err)
+                    _LOGGER.debug("Cannot connect to %s:%s: %s", host, port, err)
                     errors["base"] = "cannot_connect"
+                except Exception:
+                    _LOGGER.exception("Unexpected error while connecting to %s:%s", host, port)
+                    errors["base"] = "unknown"
+                else:
+                    return self.async_create_entry(title=DEFAULT_NAME, data=data)
                 finally:
                     await client.async_disconnect()
 
-                if not errors:
-                    return self.async_create_entry(
-                        title=DEFAULT_NAME,
-                        data=user_input,
-                    )
-
         return self.async_show_form(
             step_id="user",
-            data_schema=STEP_USER_DATA_SCHEMA,
+            data_schema=self.add_suggested_values_to_schema(STEP_USER_DATA_SCHEMA, user_input),
             errors=errors,
         )
